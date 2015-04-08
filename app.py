@@ -6,20 +6,22 @@ def main():
     r = requests.get("http://www.crunchyroll.com/bleach/episode-364-untitled-588342")
     showList = printShows()
     id =raw_input("Enter Series ID: ")
-    seriesName = selectShow(showList, id)
+    name = selectshow(showList, id)
     episodeNbr = raw_input("Episode number: ")
-    episodeList = getVidList(seriesName)
-    url = urlSelector(episodeNbr,episodeList)
-    openShow(url)
+    episodeList = getvidlist(name)
+    url = urlselector(episodeNbr, episodeList)
+    openshow(url)
 
-def selectShow(showList, id):
+
+def selectshow(showlist, id):
     id = int(id)
-    return showList[id].urlName
+    return showlist[id].urlname
 
-def openShow(url):
+
+def openshow(url):
     if url != "":
         http = requests.get("http://www.crunchyroll.com" + url)
-        req = vidSourcefromURL(http)
+        req = vidsourcefromurl(http)
         print "The url is: " + req
         webOpen = raw_input("Do you want to open the page? (Y/N): ")
         if webOpen == "Y":
@@ -31,35 +33,31 @@ def openShow(url):
 
 
 def printShows():
-    Shows = []
-    kuroko = Show("Kuroko's Basketball", "kurokos-basketball")
-    bleach = Show("Bleach", "bleach")
-    Shows.append(kuroko)
-    Shows.append(bleach)
+    shows = showsgrabber()
     i = 0
-    for show in Shows:
+    for show in shows:
         print show, i
         i +=1
-    return Shows
+    return shows
 
 
 class Show:
     name = ""
-    urlName =""
-    def __init__(self, name, urlName):
+    urlname =""
+    def __init__(self, name, urlname):
         self.name = name
-        self.urlName = urlName
+        self.urlname = urlname
     def __str__(self):
         return self.name
 
-def urlSelector(input, episodeList):
-    for episode in episodeList:
+def urlselector(input, episodelist):
+    for episode in episodelist:
         if episode.find("episode-" + input + "-") >= 0:
             return episode
     return ""
 
 
-def vidSourcefromURL(r):
+def vidsourcefromurl(r):
     http = r.text
     index = http.find("video_src")
     http = http[index-11:]
@@ -72,25 +70,31 @@ def vidSourcefromURL(r):
     req = requests.get(http)
     return http
 
-def getVidList(seriesName):
-    req = requests.get("http://www.crunchyroll.com/" + seriesName)
+def getvidlist(seriesname):
+    req = requests.get("http://www.crunchyroll.com/" + seriesname)
     r = req.text
     p = re.compile(ur'"(.*?)"')
     list = re.findall(p,r)
-    epList = []
+    eplist = []
     for element in list:
-        if element.find("/" + seriesName + "/episode-") >=0:
-            epList.append(element)
-    return epList
+        if element.find("/" + seriesname + "/episode-") >=0:
+            eplist.append(element)
+    return eplist
 
 
-def showsGrabber():
+def showsgrabber():
     req = requests.get("http://www.crunchyroll.com/videos/anime")
     r = req.text
-    #print req.text
     p = re.compile(ur'(token="shows-portraits" itemprop="url" href=)"(.*)" (class)')
-    list = re.findall(p,r)
+    list = re.findall(p, r)
+    showslist = []
     for element in list:
-        print element[1]
+        # Converts Tuple to String, removes "-" and joins them with " "
+        title = str(element[1]) 
+        title = " ".join(title[1:].split("-")) 
+        title = title[0].capitalize() + title[1:]
+        urlName = str(element[1])[1:]
+        showslist.append(Show(title, urlName))
+    return showslist
 
 main()
