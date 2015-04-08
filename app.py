@@ -1,6 +1,9 @@
 import requests
 import re
 import webbrowser
+import sys
+sys.path.append("crunchy-xml-decoder/")
+from ultimate import *
 
 def main():
     r = requests.get("http://www.crunchyroll.com/bleach/episode-364-untitled-588342")
@@ -21,13 +24,14 @@ def selectshow(showlist, id):
 def openshow(url):
     if url != "":
         http = requests.get("http://www.crunchyroll.com" + url)
-        req = vidsourcefromurl(http)
-        print "The url is: " + req
-        webOpen = raw_input("Do you want to open the page? (Y/N): ")
-        if webOpen == "Y":
+        selector = raw_input("Download (0) or Stream Online(1): ")
+        if selector == '0':
+            start(url)
+        elif selector == '1':
+            req = vidsourcefromurl(http)
             webbrowser.open(req)
         else:
-            print "Operation Aborted"
+            print "Operation Aborted, Invalid Input"
     else:
         print "Cannot find episode"
 
