@@ -3,6 +3,7 @@ Automated CrunchyRoll Scraper
 
 #How to use
     Make sure you have requests installed (http://docs.python-requests.org/en/latest/user/install/#install)
+    
     Run app.py
 
 #License
