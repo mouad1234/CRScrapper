@@ -6,14 +6,18 @@ sys.path.append("crunchy-xml-decoder/")
 from ultimate import *
 
 def main():
-    r = requests.get("http://www.crunchyroll.com/bleach/episode-364-untitled-588342")
     showList = printShows()
     id =raw_input("Enter Series ID: ")
     name = selectshow(showList, id)
-    episodeNbr = raw_input("Episode number: ")
     episodeList = getvidlist(name)
+    episodeNbr = raw_input("Episode number: ")
     url = urlselector(episodeNbr, episodeList)
     openshow(url)
+    res = raw_input("To restart press Y, otherwise press any other key: ")
+    if res == "Y" or res == "y":
+        main()
+    else:
+        exit()
 
 
 def selectshow(showlist, id):
@@ -24,7 +28,7 @@ def selectshow(showlist, id):
 def openshow(url):
     if url != "":
         http = requests.get("http://www.crunchyroll.com" + url)
-        selector = raw_input("Download (0) or Stream Online(1): ")
+        selector = raw_input("Download (PC Only) [0] or Stream Online[1]: ")
         if selector == '0':
             start(url)
         elif selector == '1':
@@ -40,7 +44,7 @@ def printShows():
     shows = showsgrabber()
     i = 0
     for show in shows:
-        print show, i
+        print show, "["+str(i)+"]"
         i +=1
     return shows
 
@@ -83,6 +87,7 @@ def getvidlist(seriesname):
     for element in list:
         if element.find("/" + seriesname + "/episode-") >=0:
             eplist.append(element)
+    print len(eplist), "Episodes available"
     return eplist
 
 
