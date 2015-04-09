@@ -6,13 +6,24 @@ sys.path.append("crunchy-xml-decoder/")
 from ultimate import *
 
 def main():
-    showList = printShows()
-    id =raw_input("Enter Series ID: ")
-    name = selectshow(showList, id)
-    episodeList = getvidlist(name)
-    episodeNbr = raw_input("Episode number: ")
-    url = urlselector(episodeNbr, episodeList)
-    openshow(url)
+    method_selector = raw_input("Select show by ID [0] or search for show [1] ?: ")
+    show_list = show_grabber()
+    if method_selector == "0":
+        print_shows(show_list)
+        id =raw_input("Enter Series ID: ")
+    elif method_selector == "1":
+        show_list = show_grabber()
+        query = raw_input("Enter query: ")
+        show_list = search_show(query, show_list)
+        print_shows(show_list)
+        id =raw_input("Enter Series ID: ")
+    else:
+        return
+    name = select_show(show_list, id)
+    episode_list = get_vid_list(name)
+    episode_nbr = raw_input("Episode number: ")
+    url = url_selector(episode_nbr, episode_list)
+    open_show(url)
     res = raw_input("To restart press Y, otherwise press any other key: ")
     if res == "Y" or res == "y":
         main()
@@ -20,19 +31,27 @@ def main():
         exit()
 
 
-def selectshow(showlist, id):
+def search_show(query, show_list):
+    search_result = []
+    for show in show_list:
+        if show.name.lower().find(query.lower()) > -1:
+            search_result.append(show)
+    return search_result
+
+
+def select_show(show_list, id):
     id = int(id)
-    return showlist[id].urlname
+    return show_list[id].url_name
 
 
-def openshow(url):
+def open_show(url):
     if url != "":
         http = requests.get("http://www.crunchyroll.com" + url)
         selector = raw_input("Download (PC Only) [0] or Stream Online[1]: ")
         if selector == '0':
             start(url)
         elif selector == '1':
-            req = vidsourcefromurl(http)
+            req = vid_source_from_url(http)
             webbrowser.open(req)
         else:
             print "Operation Aborted, Invalid Input"
@@ -40,32 +59,32 @@ def openshow(url):
         print "Cannot find episode"
 
 
-def printShows():
-    shows = showsgrabber()
+def print_shows(shows):
     i = 0
     for show in shows:
         print show, "["+str(i)+"]"
         i +=1
-    return shows
 
 
 class Show:
     name = ""
-    urlname =""
-    def __init__(self, name, urlname):
+    url_name = ""
+
+    def  __init__(self, name, urlname):
         self.name = name
-        self.urlname = urlname
+        self.url_name = urlname
+
     def __str__(self):
         return self.name
 
-def urlselector(input, episodelist):
-    for episode in episodelist:
-        if episode.find("episode-" + input + "-") >= 0:
+def url_selector(input_url, episode_list):
+    for episode in episode_list:
+        if episode.find("episode-" + input_url + "-") >= 0:
             return episode
     return ""
 
 
-def vidsourcefromurl(r):
+def vid_source_from_url(r):
     http = r.text
     index = http.find("video_src")
     http = http[index-11:]
@@ -75,35 +94,34 @@ def vidsourcefromurl(r):
     http = http[index3:]
     index4 = http.find("/>")
     http = http[:index4-2]
-    req = requests.get(http)
     return http
 
-def getvidlist(seriesname):
-    req = requests.get("http://www.crunchyroll.com/" + seriesname)
+def get_vid_list(series_name):
+    req = requests.get("http://www.crunchyroll.com/" + series_name)
     r = req.text
     p = re.compile(ur'"(.*?)"')
     list = re.findall(p,r)
-    eplist = []
+    ep_list = []
     for element in list:
-        if element.find("/" + seriesname + "/episode-") >=0:
-            eplist.append(element)
-    print len(eplist), "Episodes available"
-    return eplist
+        if element.find("/" + series_name + "/episode-") >=0:
+            ep_list.append(element)
+    print len(ep_list), "Episodes available"
+    return ep_list
 
 
-def showsgrabber():
-    req = requests.get("http://www.crunchyroll.com/videos/anime")
+def show_grabber():
+    req = requests.get("http://www.crunchyroll.com/videos/anime/alpha?group=all")
     r = req.text
     p = re.compile(ur'(token="shows-portraits" itemprop="url" href=)"(.*)" (class)')
     list = re.findall(p, r)
-    showslist = []
+    show_list = []
     for element in list:
         # Converts Tuple to String, removes "-" and joins them with " "
         title = str(element[1]) 
         title = " ".join(title[1:].split("-")) 
         title = title[0].capitalize() + title[1:]
-        urlName = str(element[1])[1:]
-        showslist.append(Show(title, urlName))
-    return showslist
+        url_name = str(element[1])[1:]
+        show_list.append(Show(title, url_name))
+    return show_list
 
 main()
