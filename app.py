@@ -105,7 +105,12 @@ def get_vid_list(series_name):
     for element in list:
         if element.find("/" + series_name + "/episode-") >=0:
             ep_list.append(element)
-    print len(ep_list), "Episodes available"
+    # since ep_list prints "/name_of_series/episode-episode_number" we cut the string in order
+    # to find the first episode available to us
+    first_ep = ep_list[len(ep_list) - 1]
+    first_ep = first_ep[first_ep.find("episode-") + 8:]
+    first_ep = first_ep[:first_ep.find("-")]
+    print len(ep_list), "Episodes available, starting from episode", first_ep
     return ep_list
 
 
