@@ -34,7 +34,7 @@ def main():
 def search_show(query, show_list):
     search_result = []
     for show in show_list:
-        if show.name.lower().find(query.lower()) > -1:
+        if query.lower() in show.name.lower():
             search_result.append(show)
     return search_result
 
@@ -70,12 +70,13 @@ class Show:
     name = ""
     url_name = ""
 
-    def  __init__(self, name, urlname):
+    def __init__(self, name, urlname):
         self.name = name
         self.url_name = urlname
 
     def __str__(self):
         return self.name
+
 
 def url_selector(input_url, episode_list):
     for episode in episode_list:
@@ -96,16 +97,18 @@ def vid_source_from_url(r):
     http = http[:index4-2]
     return http
 
+
 def get_vid_list(series_name):
     req = requests.get("http://www.crunchyroll.com/" + series_name)
     r = req.text
     p = re.compile(ur'"(.*?)"')
-    list = re.findall(p,r)
+    list = re.findall(p, r)
     ep_list = []
     for element in list:
-        if element.find("/" + series_name + "/episode-") >=0:
+        if "/" + series_name + "/episode-" in element:
             ep_list.append(element)
-    print len(ep_list), "Episodes available"
+
+    print len(ep_list), "Episodes available, starting from ",ep_list[0]
     return ep_list
 
 
