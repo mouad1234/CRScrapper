@@ -2,28 +2,52 @@ import requests
 import re
 import webbrowser
 import sys
+import os
 sys.path.append("crunchy-xml-decoder/")
 from ultimate import *
 
+
 def main():
-    method_selector = raw_input("Select show by ID [0] or search for show [1] ?: ")
+    method_selector = raw_input("1)Select show by ID\n2)Search for show\n3)Set Cookies\n ")
     show_list = show_grabber()
-    if method_selector == "0":
+    if method_selector == "1":
         print_shows(show_list)
-        id =raw_input("Enter Series ID: ")
-    elif method_selector == "1":
+        id = raw_input("Enter Series ID: ")
+    elif method_selector == "2":
         show_list = show_grabber()
         query = raw_input("Enter query: ")
         show_list = search_show(query, show_list)
         print_shows(show_list)
-        id =raw_input("Enter Series ID: ")
+        if len(show_list) < 1:
+            print "No shows found"
+            exit()
+        id = raw_input("Enter Series ID: ")
+    elif method_selector == "3":
+        os.system("python crunchy-xml-decoder/login.py yes")
+        exit()
     else:
-        return
+        exit()
     name = select_show(show_list, id)
     episode_list = get_vid_list(name)
-    episode_nbr = raw_input("Episode number: ")
-    url = url_selector(episode_nbr, episode_list)
-    open_show(url)
+    selector = raw_input("Download (PC Only) [0] or Stream Online[1]: ")
+    if selector == "1":
+        episode_nbr = raw_input("Episode number: ")
+        url = url_selector(episode_nbr, episode_list)
+        open_show(url)
+    elif selector == "0":
+        print "1)Single Download\n2) Batch Download"
+        download_options = raw_input()
+        if download_options == "1":
+            episode_nbr = raw_input("Episode number: ")
+            url = url_selector(episode_nbr, episode_list)
+            download_show(url)
+        elif download_options == "2":
+            episode_start = int(raw_input("Starting from: "))
+            episode_end = int(raw_input("Until Episode: "))
+            while episode_end > episode_start:
+                url = url_selector(str(episode_start), episode_list)
+                start(url)
+                episode_start += 1
     res = raw_input("To restart press Y, otherwise press any other key: ")
     if res == "Y" or res == "y":
         main()
@@ -44,26 +68,22 @@ def select_show(show_list, id):
     return show_list[id].url_name
 
 
+def download_show(url):
+    start(url)
+
+
 def open_show(url):
     if url != "":
         http = requests.get("http://www.crunchyroll.com" + url)
-        selector = raw_input("Download (PC Only) [0] or Stream Online[1]: ")
-        if selector == '0':
-            start(url)
-        elif selector == '1':
-            req = vid_source_from_url(http)
-            webbrowser.open(req)
-        else:
-            print "Operation Aborted, Invalid Input"
-    else:
-        print "Cannot find episode"
+        req = vid_source_from_url(http)
+        webbrowser.open(req)
 
 
 def print_shows(shows):
     i = 0
     for show in shows:
         print show, "["+str(i)+"]"
-        i +=1
+        i += 1
 
 
 class Show:
@@ -90,7 +110,7 @@ def vid_source_from_url(r):
     index = http.find("video_src")
     http = http[index-11:]
     index2 = http.find("/>")
-    http= http[:index2+2]
+    http = http[:index2+2]
     index3 = http.find("http")
     http = http[index3:]
     index4 = http.find("/>")
