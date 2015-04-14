@@ -107,8 +107,10 @@ def get_vid_list(series_name):
     for element in list:
         if "/" + series_name + "/episode-" in element:
             ep_list.append(element)
-
-    print len(ep_list), "Episodes available, starting from ",ep_list[0]
+    first_ep = ep_list[len(ep_list) - 1]
+    first_ep = first_ep[first_ep.find("episode-") + 8:]
+    first_ep = first_ep[:first_ep.find("-")]
+    print len(ep_list), "Episodes available, starting from episode", first_ep
     return ep_list
 
 
