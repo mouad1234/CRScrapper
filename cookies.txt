@@ -1,4 +1,8 @@
 # Netscape HTTP Cookie File
-# http://www.netscape.com/newsref/std/cookie_spec.html
+# http://curl.haxx.se/rfc/cookie_spec.html
 # This is a generated file!  Do not edit.
 
+.crunchyroll.com	TRUE	/	FALSE	1460525504	__cfduid	d2d0bed34cea7232e525c48a321fc46651428989504
+.crunchyroll.com	TRUE	/	FALSE	1430200599	c_d	a%3D24%26g%3DM%26p%3D1
+.crunchyroll.com	TRUE	/	FALSE	1430200599	c_userid	31942571
+.crunchyroll.com	TRUE	/	FALSE	1430200599	c_userkey	2%3Aco%2FfSV0UPjytYi8FpdVGsNk8LIw%3D
